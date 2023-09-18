@@ -596,6 +596,23 @@ class AutoReseed
                     self::$sites[$sid]['base_url'] = self::$_sites[$siteName]['mirror'];
                 }
 
+                // 20230918 add by lxh 原因: ourbits 谢绝发布以下小组的资源：FRDS小组、FGT小组
+                if ($siteName === 'ourbits') {
+                    $res = static::getRpc($clientKey)->get($info_hash);
+                    if (isset($res['result']) && $res['result'] === 'success') {
+                        if (empty($res['arguments']['torrents'])) {
+                            // 从客户端未获取到数据，暂不用管
+                        }else{
+                            $torrent_name = $res['arguments']['torrents'][0]['name'];
+                            if (preg_match("/FRDS/i", $torrent_name)) {
+                                echo 'ourbits谢绝发布FRDS小组的资源, 已跳过. info_hash: ' . $info_hash . ', torrent_name: ' . $torrent_name . PHP_EOL . PHP_EOL;
+                                self::$notifyMsg['reseedSkip']++;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
                 // 临时种子连接（会写入辅种日志）
                 $_url = $protocol . self::$sites[$sid]['base_url'] . '/' . $download_page;
                 /**
