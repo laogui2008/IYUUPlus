@@ -612,6 +612,15 @@ class AutoReseed
                         }
                     }
                 }
+                
+                // 20230918 add by lxh  猫站 过滤掉已经删除的种子数据
+                if ($siteName === 'pter') {
+                    $error_torrent_ids = file("/IYUU/error_torrentids/pter_error_torrentids.txt");
+                    if (!empty($error_torrent_ids) && in_array($torrent_id, $error_torrent_ids)) {
+                        self::$notifyMsg['reseedSkip']++;
+                        continue;
+                    }
+                }
 
                 // 临时种子连接（会写入辅种日志）
                 $_url = $protocol . self::$sites[$sid]['base_url'] . '/' . $download_page;
