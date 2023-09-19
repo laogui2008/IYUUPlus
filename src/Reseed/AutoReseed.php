@@ -567,6 +567,7 @@ class AutoReseed
     private static function selfClientReseed(array $data = [], array $hashString = [], string $clientKey = '')
     {
         foreach ($data as $info_hash => $reseed) {
+            echo 'local client info_hash: ' . $info_hash . PHP_EOL . PHP_EOL;
             $downloadDir = $hashString[$info_hash];   // 辅种目录
             foreach ($reseed['torrent'] as $id => $value) {
                 // 匹配的辅种数据累加
@@ -610,6 +611,13 @@ class AutoReseed
                                 continue;
                             }
                         }
+                    }
+
+                    // 20230919 add by lxh 我堡 过滤掉已经删除的种子数据
+                    $error_torrent_ids = file("/IYUU/error_torrentids/ourbits_error_torrent_ids.txt");
+                    if (!empty($error_torrent_ids) && in_array($torrent_id, $error_torrent_ids)) {
+                        self::$notifyMsg['reseedSkip']++;
+                        continue;
                     }
                 }
                 
